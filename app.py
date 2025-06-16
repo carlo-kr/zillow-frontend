@@ -55,7 +55,7 @@ if submit:
 
     with st.spinner('Calculating price estimate...'):
         try:
-            response = requests.get(api_url, params=params)
+            response = requests.post(api_url, json=params)
             response.raise_for_status()
             prediction = response.json()
             pred = prediction.get('prediction')
@@ -90,7 +90,7 @@ if zipcode:
 
         with st.spinner('Fetching investment outlook...'):
             try:
-                trend_response = requests.get(trend_api_url, params=trend_params)
+                trend_response = requests.post(trend_api_url, json=trend_params)
                 trend_response.raise_for_status()
                 trend_result = trend_response.json()
 
