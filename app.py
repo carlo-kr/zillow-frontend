@@ -47,7 +47,7 @@ if submit:
         bed=bed,
         bath=bath,
         acre_lot=acre_lot,
-        zipcode=zipcode,
+        zip_code=zipcode,
         house_size=house_size
     )
 
