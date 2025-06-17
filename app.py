@@ -57,6 +57,7 @@ if submit:
         try:
             response = requests.post(api_url, json=params)
             response.raise_for_status()
+            st.write("🔎 Raw Response:", response.json())
             prediction = response.json()
             pred = prediction.get('prediction')
 
