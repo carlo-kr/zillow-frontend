@@ -97,7 +97,7 @@ if zipcode:
                 if "is_good_investment" in trend_result:
                     is_good = trend_result["is_good_investment"]
                     rec_text = "Good investment 👍" if is_good else "Not a good investment 👎"
-                    st.subheader(f"📌 Investment Outlook: {rec_text}")
+                    st.subheader(f"Investment Outlook: {rec_text}")
                     st.write(f"ZIP code: {trend_result['zip_code']}")
                     st.write(f"Time Horizon: {trend_result['time_horizon_months']} months")
                 else:
