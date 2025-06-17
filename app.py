@@ -59,7 +59,7 @@ if submit:
             response.raise_for_status()
             st.write("🔎 Raw Response:", response.json())
             prediction = response.json()
-            pred = prediction.get('prediction')
+            pred = prediction.get('predicted_price')
 
             if pred is not None:
                 st.success(f'🏷️ Estimated Price: ${pred:,.2f}')
