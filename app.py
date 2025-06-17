@@ -43,17 +43,21 @@ with st.form(key='params_for_api'):
     with cols[1]:
         acre_lot = st.number_input('Lot size (acres)', min_value=0.0, step=0.01, format="%.2f", help="Size of the lot in acres")
         zipcode = st.text_input('ZIP code', max_chars=10, help="Enter ZIP code to localize prediction")
+        zipcode = int(zipcode) if zipcode.isdigit() else None
 
     submit = st.form_submit_button('Make prediction')
 
-if submit:
+if submit and zipcode is not None:
     params = dict(
         bed=bed,
         bath=bath,
         acre_lot=acre_lot,
-        zipcode=zipcode,
+        zip_code=zipcode,  # now an int ✅
         house_size=house_size
     )
+
+    st.write("Sending to API:", params)
+
 
     api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
 
