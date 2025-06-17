@@ -43,11 +43,10 @@ with st.form(key='params_for_api'):
     with cols[1]:
         acre_lot = st.number_input('Lot size (acres)', min_value=0.0, step=0.01, format="%.2f", help="Size of the lot in acres")
         zipcode = st.text_input('ZIP code', max_chars=10, help="Enter ZIP code to localize prediction")
-        zipcode = int(zipcode) if zipcode.isdigit() else None
 
     submit = st.form_submit_button('Make prediction')
 
-if submit and zipcode is not None:
+if submit:
     params = dict(
         bed=bed,
         bath=bath,
