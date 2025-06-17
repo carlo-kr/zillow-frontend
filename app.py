@@ -52,7 +52,7 @@ if submit and zipcode is not None:
         bed=bed,
         bath=bath,
         acre_lot=acre_lot,
-        zipcode=zipcode,  # now an int ✅
+        zip_code=zipcode,
         house_size=house_size
     )
 
