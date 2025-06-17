@@ -1,6 +1,10 @@
 import streamlit as st
 import requests
 
+# Initialize session state
+if "predicted_price" not in st.session_state:
+    st.session_state.predicted_price = None
+
 st.markdown(
     """
     <style>
@@ -47,25 +51,32 @@ if submit:
         bed=bed,
         bath=bath,
         acre_lot=acre_lot,
-        zip_code=zipcode,
+        zipcode=zipcode,
         house_size=house_size
     )
 
     api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
 
-    with st.spinner('Calculating price estimate...'):
+    with st.spinner('⏳ Calculating price estimate...'):
         try:
             response = requests.post(api_url, json=params)
             response.raise_for_status()
             prediction = response.json()
-            pred = prediction.get('predicted_price')
+            pred = prediction.get('prediction')
 
             if pred is not None:
-                st.success(f'🏷️ Estimated Price: ${pred:,.2f}')
+                st.session_state.predicted_price = pred
             else:
                 st.error("Prediction missing in API response.")
         except Exception as e:
             st.error(f"Error fetching prediction: {e}")
+
+# 👇 Display estimated price if present in session state
+if st.session_state.predicted_price is not None:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("🏷️ Estimated Price")
+    st.success(f"${st.session_state.predicted_price:,.2f}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('---')
 
