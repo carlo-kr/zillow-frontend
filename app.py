@@ -57,25 +57,27 @@ if submit:
 
     st.write("Sending to API:", params)
 
-
     api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
 
     with st.spinner('⏳ Calculating price estimate...'):
         try:
             st.write("Sending the following data to API:", params)
             response = requests.post(api_url, json=params)
-            response.raise_for_status()
-            prediction = response.json()
-            pred = prediction.get('prediction')
+            response.raise_for_status() # Raise an exception for HTTP errors (4xx or 5xx)
+            prediction_data = response.json() #
+            pred = prediction_data.get('predicted_price')
 
             if pred is not None:
                 st.session_state.predicted_price = pred
             else:
                 st.error("Prediction missing in API response.")
+                st.write("Full API response:", prediction_data) # Add for debugging
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to API: {e}")
         except Exception as e:
-            st.error(f"Error fetching prediction: {e}")
+            st.error(f"An unexpected error occurred: {e}")
 
-# 👇 Display estimated price if present in session state
+# Display estimated price if present in session state
 if st.session_state.predicted_price is not None:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("🏷️ Estimated Price")
@@ -84,6 +86,7 @@ if st.session_state.predicted_price is not None:
 
 st.markdown('---')
 
+# Trend Estimate for ZIP_CODE section
 if zipcode:
     st.header("📊 Investment Outlook")
 
@@ -106,7 +109,7 @@ if zipcode:
 
             with st.spinner('Fetching investment outlook...'):
                 trend_response = requests.post(trend_api_url, json=trend_params)
-                trend_response.raise_for_status()
+                trend_response.raise_for_status() # Raise an exception for HTTP errors
                 trend_result = trend_response.json()
 
                 if "is_good_investment" in trend_result:
@@ -117,8 +120,11 @@ if zipcode:
                     st.write(f"Time Horizon: {trend_result['time_horizon_months']} months")
                 else:
                     st.warning("Unexpected response format from the API.")
+                    st.write("Full API response for trend:", trend_result) # Add for debugging
 
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to trend API: {e}")
         except Exception as e:
-            st.error(f"Could not fetch trend data: {e}")
+            st.error(f"An unexpected error occurred while fetching trend data: {e}")
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
