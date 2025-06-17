@@ -59,6 +59,7 @@ if submit:
 
     with st.spinner('⏳ Calculating price estimate...'):
         try:
+            st.write("Sending the following data to API:", params)
             response = requests.post(api_url, json=params)
             response.raise_for_status()
             prediction = response.json()
