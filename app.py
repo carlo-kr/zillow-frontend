@@ -48,11 +48,11 @@ with st.form(key='params_for_api'):
 
 if submit:
     params = dict(
-        bed=bed,
-        bath=bath,
-        acre_lot=acre_lot,
+        bed=float(bed),
+        bath=float(bath),
+        acre_lot=float(acre_lot),
         zip_code=zipcode,
-        house_size=house_size
+        house_size=float(house_size)
     )
 
     st.write("Sending to API:", params)
@@ -63,8 +63,8 @@ if submit:
         try:
             st.write("Sending the following data to API:", params)
             response = requests.post(api_url, json=params)
-            response.raise_for_status() # Raise an exception for HTTP errors (4xx or 5xx)
-            prediction_data = response.json() #
+            response.raise_for_status()
+            prediction_data = response.json()
             pred = prediction_data.get('predicted_price')
 
             if pred is not None:
