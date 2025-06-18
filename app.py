@@ -32,6 +32,7 @@ st.markdown(
 
 st.title('🏠 Real Estate Price Estimator')
 
+# Get user input through form
 with st.form(key='params_for_api'):
     cols = st.columns(2)
 
@@ -55,13 +56,15 @@ if submit:
         house_size=float(house_size)
     )
 
-    st.write("Sending to API:", params)
+    #st.write("Sending to API:", params)
 
+    # Url for the /predict endpoint
     api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
 
+    # Send post request to api and save result
     with st.spinner('⏳ Calculating price estimate...'):
         try:
-            st.write("Sending the following data to API:", params)
+            #st.write("Sending the following data to API:", params)
             response = requests.post(api_url, json=params)
             response.raise_for_status()
             prediction_data = response.json()
@@ -105,8 +108,10 @@ if zipcode:
                 "time_horizon": time_horizon
             }
 
+            # Url for the /predict_investment endpoint
             trend_api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict_investment'
 
+            # Send post request and display result
             with st.spinner('Fetching investment outlook...'):
                 trend_response = requests.post(trend_api_url, json=trend_params)
                 trend_response.raise_for_status() # Raise an exception for HTTP errors
@@ -128,3 +133,9 @@ if zipcode:
             st.error(f"An unexpected error occurred while fetching trend data: {e}")
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
+
+
+# Send get request to /get_city_data
+data_url = ""
+
+city_df = requests.get(data_url, )
