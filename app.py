@@ -136,48 +136,77 @@ if zipcode:
         except Exception as e:
             st.error(f"An unexpected error occurred while fetching trend data: {e}")
     st.header("📉 Historical Price Trend")
-
-    try:
-        response = requests.post(
-            "https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend",
-            json={"zip_code": zipcode}
-        )
-        response.raise_for_status()
-        data = response.json()
-        trend = data.get("trend", [])
-
-        if not trend:
-            st.warning("No trend data available for this ZIP code.")
-        else:
-            df_trend = pd.DataFrame(trend)
-            df_trend["date"] = pd.to_datetime(df_trend["date"])
-
-            fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
-            st.plotly_chart(fig, use_container_width=True)
-
-    except Exception as e:
-        st.error(f"Error fetching trend data: {e}")
-
-    try:
-        trend_api = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
-        response = requests.post(trend_api, json={"zip_code": zipcode})
-        response.raise_for_status()
-        data = response.json()
-        df_one_city = pd.DataFrame(data["trend"])
-        df_one_city["date"] = pd.to_datetime(df_one_city["date"])
-    except Exception as e:
-        st.error(f"Another Error fetching trend data: {e}")
-
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
 
+# try:
+#     response = requests.post(
+#         "https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend",
+#         json={"zip_code": zipcode}
+#     )
+#     response.raise_for_status()
+#     data = response.json()
+#     trend = data.get("trend", [])
 
+#     if not trend:
+#         st.warning("No trend data available for this ZIP code.")
+#     else:
+#         df_trend = pd.DataFrame(trend)
+#         df_trend["date"] = pd.to_datetime(df_trend["date"])
+
+#         fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
+#         st.plotly_chart(fig, use_container_width=True)
+
+# except Exception as e:
+#     st.error(f"Error fetching trend data: {e}")
+
+try:
+    trend_api = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
+    response = requests.post(trend_api, json={"zip_code": zipcode})
+    st.write("Receiving from API:", response)
+    response.raise_for_status()
+    data = response.json()
+    df_zipcode = pd.DataFrame(data["trend"])
+    df_zipcode["date"] = pd.to_datetime(df_zipcode["date"])
+except Exception as e:
+    st.error(f"Another Error fetching trend data: {e}")
+
+
+# Price over time zipcode
 #k = data["zip_code"]  # for labeling
 plt.figure(figsize=(14, 6))
-sns.lineplot(data=df_one_city, x='date', y='price')
+sns.lineplot(data=df_zipcode, x='date', y='price')
 plt.title('Price in $ over time')
 plt.xlabel('Date')
 #plt.ylabel(f'Price of Houses in the city {k}')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+st.pyplot(plt)
+
+
+try:
+    trend_api = "http://127.0.0.1:8000/yearly_price_evolution"  # for local dev
+    response = requests.get(trend_api, params={"zip_code": zipcode})
+    response.raise_for_status()
+    data = response.json()
+    #breakpoint()
+    df_yearly = pd.DataFrame(data["data"])
+    df_yearly["year"] = pd.to_datetime(df_yearly["year"])
+except Exception as e:
+    st.error(f"Another Error fetching trend data: {e}")
+
+# Step 3: Plot median sale price and median home value over time
+plt.figure(figsize=(12, 6))
+plt.plot(df_yearly['year'], df_yearly['median_sale_price'], marker='o', label='Median Sale Price')
+plt.plot(df_yearly['year'], df_yearly['Median Home Value'], marker='s', label='Median Home Value')
+# Step 4: Style the plot
+plt.title(f"Yearly Price Evolution - ZIP {zipcode}")
+plt.xlabel("Year")
+plt.ylabel("USD")
+plt.xticks(rotation=45)
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend()
+plt.tight_layout()
+plt.show()
+st.pyplot(plt)
