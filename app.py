@@ -137,5 +137,3 @@ else:
 
 # Send get request to /get_city_data
 data_url = ""
-
-city_df = requests.get(data_url, )
