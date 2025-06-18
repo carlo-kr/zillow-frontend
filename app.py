@@ -166,9 +166,6 @@ if zipcode:
         if trend:
             df_trend = pd.DataFrame(trend)
             df_trend["date"] = pd.to_datetime(df_trend["date"])
-
-            fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
-            st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("No data to show for this ZIP.")
     except Exception as e:
@@ -179,4 +176,5 @@ else:
 
 
 # Send get request to /get_city_data
-data_url = ""
+fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
+st.plotly_chart(fig, use_container_width=True)
