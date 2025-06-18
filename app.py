@@ -210,3 +210,14 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 st.pyplot(plt)
+
+
+try:
+    trend_api = "http://127.0.0.1:8000/filter_city"  # for local dev
+    response = requests.get(trend_api, params={"zip_code": zipcode})
+    response.raise_for_status()
+    data = response.json()
+    df_yearly = pd.DataFrame(data["data"])
+    df_yearly["year"] = pd.to_datetime(df_yearly["year"])
+except Exception as e:
+    st.error(f"Another Error fetching trend data: {e}")
