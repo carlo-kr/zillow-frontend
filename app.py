@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Initialize session state
 if "predicted_price" not in st.session_state:
@@ -161,20 +163,21 @@ if zipcode:
         response = requests.post(trend_api, json={"zip_code": zipcode})
         response.raise_for_status()
         data = response.json()
-        trend = data.get("trend", [])
-
-        if trend:
-            df_trend = pd.DataFrame(trend)
-            df_trend["date"] = pd.to_datetime(df_trend["date"])
-        else:
-            st.warning("No data to show for this ZIP.")
+        df_one_city = pd.DataFrame(data["trend"])
+        df_one_city["date"] = pd.to_datetime(df_one_city["date"])
     except Exception as e:
-        st.error(f"Error fetching trend data: {e}")
+        st.error(f"Another Error fetching trend data: {e}")
 
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
 
 
-# Send get request to /get_city_data
-fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
-st.plotly_chart(fig, use_container_width=True)
+#k = data["zip_code"]  # for labeling
+plt.figure(figsize=(14, 6))
+sns.lineplot(data=df_one_city, x='date', y='price')
+plt.title('Price in $ over time')
+plt.xlabel('Date')
+#plt.ylabel(f'Price of Houses in the city {k}')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
