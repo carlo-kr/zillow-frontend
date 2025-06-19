@@ -180,7 +180,6 @@ if zipcode:
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
 
-
 if not df_city.empty and not df_zipcode.empty and not df_all_cities.empty:
    plt.close('all')  # Close all existing figures
    fig, ax = plt.subplots(figsize=(14, 8))  # Create new figure and axis
