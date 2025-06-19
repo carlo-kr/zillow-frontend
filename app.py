@@ -61,8 +61,9 @@ if submit:
     )
 
     # Url for the /predict endpoint
-    #predict_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
-    predict_url = "http://127.0.0.1:8000/predict"
+    #
+    predict_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
+    #predict_url = "http://127.0.0.1:8000/predict"
 
     # Send post request to api and save result
     with st.spinner('⏳ Calculating price estimate...'):
@@ -110,8 +111,8 @@ if zipcode:
             }
 
             # Url for the /predict_investment endpoint
-            #trend_api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict_investment'
-            trend_api_url = "http://127.0.0.1:8000/predict_investment"
+            trend_api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict_investment'
+            #trend_api_url = "http://127.0.0.1:8000/predict_investment"
             # Send post request and display result
             with st.spinner('Fetching investment outlook...'):
                 trend_response = requests.post(trend_api_url, json=trend_params)
@@ -139,8 +140,8 @@ else:
 
 # Call zipcode_trend api
 try:
-    zipcode_url = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
-    #zipcode_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend'
+    #zipcode_url = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
+    zipcode_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend'
     response = requests.post(zipcode_url, json={"zip_code": zipcode})
     response.raise_for_status()
     data = response.json()
@@ -151,8 +152,8 @@ except Exception as e:
 
 # Call filter_city api
 try:
-    city_url = "http://127.0.0.1:8000/filter_city"  # for local dev
-    #city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/filter_city'
+    #city_url = "http://127.0.0.1:8000/filter_city"  # for local dev
+    city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/filter_city'
     response = requests.get(city_url, params={"zip_code": zipcode})
     response.raise_for_status()
     data = response.json()
@@ -164,8 +165,8 @@ except Exception as e:
 
 # Call all_city api
 try:
-    all_city_url = "http://127.0.0.1:8000/price_all_cities"  # for local dev
-    #all_city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/price_all_cities'
+    #all_city_url = "http://127.0.0.1:8000/price_all_cities"  # for local dev
+    all_city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/price_all_cities'
     response = requests.get(all_city_url)
     response.raise_for_status()
     data = response.json()
