@@ -60,16 +60,15 @@ if submit:
         house_size=float(house_size)
     )
 
-    #st.write("Sending to API:", params)
-
     # Url for the /predict endpoint
-    api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
+    #predict_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict'
+    predict_url = "http://127.0.0.1:8000/predict"
 
     # Send post request to api and save result
     with st.spinner('⏳ Calculating price estimate...'):
         try:
             #st.write("Sending the following data to API:", params)
-            response = requests.post(api_url, json=params)
+            response = requests.post(predict_url, json=params)
             response.raise_for_status()
             prediction_data = response.json()
             pred = prediction_data.get('predicted_price')
@@ -91,8 +90,6 @@ if st.session_state.predicted_price is not None:
     st.success(f"${st.session_state.predicted_price:,.2f}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('---')
-
 # Trend Estimate for ZIP_CODE section
 if zipcode:
     st.header("📊 Investment Outlook")
@@ -113,8 +110,8 @@ if zipcode:
             }
 
             # Url for the /predict_investment endpoint
-            trend_api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict_investment'
-
+            #trend_api_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/predict_investment'
+            trend_api_url = "http://127.0.0.1:8000/predict_investment"
             # Send post request and display result
             with st.spinner('Fetching investment outlook...'):
                 trend_response = requests.post(trend_api_url, json=trend_params)
@@ -123,10 +120,10 @@ if zipcode:
 
                 if "is_good_investment" in trend_result:
                     is_good = trend_result["is_good_investment"]
-                    rec_text = "Good investment 👍" if is_good else "Not a good investment 👎"
-                    st.subheader(f"Investment Outlook: {rec_text}")
-                    st.write(f"ZIP code: {trend_result['zip_code']}")
-                    st.write(f"Time Horizon: {trend_result['time_horizon_months']} months")
+                    rec_text = "Good time to buy 👍 & Bad time to sell 👎" if is_good else "Good time to sell 👍 & Bad time to buy 👎"
+                    st.subheader(f"Outlook: {rec_text}")
+                    #st.write(f"ZIP code: {trend_result['zip_code']}")
+                    #st.write(f"Time Horizon: {trend_result['time_horizon_months']} months")
                 else:
                     st.warning("Unexpected response format from the API.")
                     st.write("Full API response for trend:", trend_result) # Add for debugging
@@ -139,85 +136,55 @@ if zipcode:
 else:
     st.info("ℹ️ Enter a ZIP code above to check investment outlook.")
 
-# try:
-#     response = requests.post(
-#         "https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend",
-#         json={"zip_code": zipcode}
-#     )
-#     response.raise_for_status()
-#     data = response.json()
-#     trend = data.get("trend", [])
 
-#     if not trend:
-#         st.warning("No trend data available for this ZIP code.")
-#     else:
-#         df_trend = pd.DataFrame(trend)
-#         df_trend["date"] = pd.to_datetime(df_trend["date"])
-
-#         fig = px.line(df_trend, x="date", y="price", title=f"Price Over Time – ZIP {zipcode}")
-#         st.plotly_chart(fig, use_container_width=True)
-
-# except Exception as e:
-#     st.error(f"Error fetching trend data: {e}")
-
+# Call zipcode_trend api
 try:
-    trend_api = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
-    response = requests.post(trend_api, json={"zip_code": zipcode})
-    st.write("Receiving from API:", response)
+    zipcode_url = "http://127.0.0.1:8000/zipcode_trend"  # for local dev
+    #zipcode_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/zipcode_trend'
+    response = requests.post(zipcode_url, json={"zip_code": zipcode})
     response.raise_for_status()
     data = response.json()
     df_zipcode = pd.DataFrame(data["trend"])
     df_zipcode["date"] = pd.to_datetime(df_zipcode["date"])
 except Exception as e:
-    st.error(f"Another Error fetching trend data: {e}")
+    st.error(f"Zipcode_trend Error fetching trend data: {e}")
+
+# Call filter_city api
+try:
+    city_url = "http://127.0.0.1:8000/filter_city"  # for local dev
+    #city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/filter_city'
+    response = requests.get(city_url, params={"zip_code": zipcode})
+    response.raise_for_status()
+    data = response.json()
+    df_city = pd.DataFrame(data["data"])
+    df_city["date"] = pd.to_datetime(df_city["date"])
+    city = data['city']
+except Exception as e:
+    st.error(f"Filter_city Error fetching trend data: {e}")
+
+# Call all_city api
+try:
+    all_city_url = "http://127.0.0.1:8000/price_all_cities"  # for local dev
+    #all_city_url = 'https://my-docker-image-for-zillow-880235258708.europe-west1.run.app/price_all_cities'
+    response = requests.get(all_city_url)
+    response.raise_for_status()
+    data = response.json()
+    df_all_cities = pd.DataFrame(data["data"])
+    df_all_cities["date"] = pd.to_datetime(df_all_cities["date"])
+except Exception as e:
+    st.error(f"Filter_city Error fetching trend data: {e}")
 
 
-# Price over time zipcode
-#k = data["zip_code"]  # for labeling
-plt.figure(figsize=(14, 6))
-sns.lineplot(data=df_zipcode, x='date', y='price')
+# Plot price for city
+#k = df_city["zip_code"]  # for labeling
+plt.figure(figsize=(14, 8))
+sns.lineplot(data=df_city, x='date', y='price', label=f'City: {city}')
+sns.lineplot(data=df_zipcode, x='date', y='price', label=f'Zipcode: {zipcode}')
+sns.lineplot(data=df_all_cities, x='date', y='price', label='All Cities')
 plt.title('Price in $ over time')
-plt.xlabel('Date')
-#plt.ylabel(f'Price of Houses in the city {k}')
+plt.xlabel('Year')
+plt.ylabel(f'Price in $')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 st.pyplot(plt)
-
-
-try:
-    trend_api = "http://127.0.0.1:8000/yearly_price_evolution"  # for local dev
-    response = requests.get(trend_api, params={"zip_code": zipcode})
-    response.raise_for_status()
-    data = response.json()
-    #breakpoint()
-    df_yearly = pd.DataFrame(data["data"])
-    df_yearly["year"] = pd.to_datetime(df_yearly["year"])
-except Exception as e:
-    st.error(f"Another Error fetching trend data: {e}")
-
-# Step 3: Plot median sale price and median home value over time
-plt.figure(figsize=(12, 6))
-plt.plot(df_yearly['year'], df_yearly['median_sale_price'], marker='o', label='Median Sale Price')
-plt.plot(df_yearly['year'], df_yearly['Median Home Value'], marker='s', label='Median Home Value')
-# Step 4: Style the plot
-plt.title(f"Yearly Price Evolution - ZIP {zipcode}")
-plt.xlabel("Year")
-plt.ylabel("USD")
-plt.xticks(rotation=45)
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend()
-plt.tight_layout()
-plt.show()
-st.pyplot(plt)
-
-
-try:
-    trend_api = "http://127.0.0.1:8000/filter_city"  # for local dev
-    response = requests.get(trend_api, params={"zip_code": zipcode})
-    response.raise_for_status()
-    data = response.json()
-    df_yearly = pd.DataFrame(data["data"])
-    df_yearly["year"] = pd.to_datetime(df_yearly["year"])
-except Exception as e:
-    st.error(f"Another Error fetching trend data: {e}")
