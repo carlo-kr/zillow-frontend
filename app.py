@@ -178,6 +178,15 @@ except Exception as e:
 
 # Plot price for city
 #k = df_city["zip_code"]  # for labeling
+
+
+st.write("City DF shape:", df_city.shape)
+st.write("Zipcode DF shape:", df_zipcode.shape)
+st.write("All Cities DF shape:", df_all_cities.shape)
+
+st.write("Sample of df_city:", df_city.head())
+st.write("Sample of df_zipcode:", df_zipcode.head())
+st.write("Sample of df_all_cities:", df_all_cities.head())
 plt.figure(figsize=(14, 8))
 sns.lineplot(data=df_city, x='date', y='price', label=f'City: {city}')
 sns.lineplot(data=df_zipcode, x='date', y='price', label=f'Zipcode: {zipcode}')
